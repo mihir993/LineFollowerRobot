@@ -21,8 +21,10 @@ int distance;
 String Left = "Left";
 String Right = "Right";
 String Flag = "Left";
+float coeff = 1.0;
+float turncoeff = 1.0;
 //Declairatios for LCD
-#include<Wire.h>
+#include<Wire.h>                                                          
 #include <LiquidCrystal_I2C.h>
 #include <LiquidCrystal.h>
 #include <LCD.h>
@@ -86,21 +88,21 @@ distance = traveltime * 0.034/2;
 lcd.setCursor(0,1);
 lcd.print("dis=");
 lcd.print(distance);
-if (distance > 9){ // No objects till 9cm
+if (distance > 10){ // No objects till 9cm
   if ((sensorValueLft < 50) && (sensorValueMid < 50) && (sensorValueRgt < 50)){  //000  --> Search for black
     if (Flag == "Left"){
       Stop();
-      delay(200);
-      Forward(Right, 200);
-      Backward(Left, 200);
-      delay(10);
+      delay(100);
+      Forward(Right, 255*coeff*0.5);
+      Backward(Left, 255*coeff*0.5);
+      delay(8);
       }
     else if (Flag == "Right"){
       Stop();
-      delay(200);
-      Forward(Left, 200);
-      Backward(Right, 200);
-      delay(10);
+      delay(100);
+      Forward(Left, 255*coeff*0.5);
+      Backward(Right, 255*coeff*0.5);
+      delay(8);
       }
     }
   else if ((sensorValueLft < 50) && (sensorValueMid < 50) && (sensorValueRgt > 90)){  //001 --> Fast turn Right
@@ -111,12 +113,12 @@ if (distance > 9){ // No objects till 9cm
     }
   else if ((sensorValueLft < 50) && (sensorValueMid > 90) && (sensorValueRgt < 50)){  //010 --> Fast Forward
     if(sensorValueMid > 180){
-      Forward(Left, 255);
-      Forward(Right, 255);
+      Forward(Left, 255*coeff);
+      Forward(Right, 255*coeff);
       }
     else{
-      Forward(Left, 190);
-      Forward(Right, 190);
+      Forward(Left, 255*coeff);
+      Forward(Right, 255*coeff);
       }
     }
   else if ((sensorValueLft < 50) && (sensorValueMid > 90) && (sensorValueRgt > 90)){  //011 --> Turn Right
@@ -134,8 +136,8 @@ if (distance > 9){ // No objects till 9cm
     Flag = "Left";
     }
   else if ((sensorValueLft > 90) && (sensorValueMid > 90) && (sensorValueRgt > 90)){  //111 --> Forward
-    Forward(Left, 255);
-    Forward(Right, 255);
+    Forward(Left, 255*coeff);
+    Forward(Right, 255*coeff);
     }
   else{  //101 --> Not defined
     }
@@ -230,16 +232,16 @@ if (side == "Left"){
   digitalWrite(powerLeft, HIGH);
   digitalWrite(brgRight, HIGH);
   digitalWrite(brgLeft, LOW);
-  analogWrite(pwmRight,127);
-  analogWrite(pwmLeft,127/2);
+  analogWrite(pwmRight,255-255*turncoeff);
+  analogWrite(pwmLeft,255*turncoeff/2);
   }
 else if (side == "Right"){
   digitalWrite(powerRight, HIGH);
   digitalWrite(powerLeft, HIGH);
   digitalWrite(brgRight, HIGH);
   digitalWrite(brgLeft, LOW);
-  analogWrite(pwmLeft,255/2);
-  analogWrite(pwmRight,191.25);
+  analogWrite(pwmLeft,255*turncoeff);
+  analogWrite(pwmRight,255-(255*turncoeff/2));
   }
 }
 void Stop(){
