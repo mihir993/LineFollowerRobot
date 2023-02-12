@@ -86,88 +86,142 @@ distance = traveltime * 0.034/2;
 lcd.setCursor(0,1);
 lcd.print("dis=");
 lcd.print(distance);
-if ((sensorValueMid > 90) && distance > 5){
-  if ((sensorValueLft <50) && (sensorValueRgt < 50)){
-    Forward(Left);
-    Forward(Right);
+if (distance > 9){ // No objects till 9cm
+  if ((sensorValueLft < 50) && (sensorValueMid < 50) && (sensorValueRgt < 50)){  //000  --> Search for black
+    if (Flag == "Left"){
+      Stop();
+      delay(200);
+      Forward(Right, 200);
+      Backward(Left, 200);
+      delay(10);
+      }
+    else if (Flag == "Right"){
+      Stop();
+      delay(200);
+      Forward(Left, 200);
+      Backward(Right, 200);
+      delay(10);
+      }
     }
-  else if ((sensorValueLft > 90)&& (sensorValueRgt < 50)){
-    Turn(Left);
-    Flag =  "Left";
-    }
-  else if ((sensorValueLft <50)&& (sensorValueRgt > 90)){
+  else if ((sensorValueLft < 50) && (sensorValueMid < 50) && (sensorValueRgt > 90)){  //001 --> Fast turn Right
+    //Stop();
+    //Forward(Left, 255);
     Turn(Right);
     Flag = "Right";
     }
-  else if ((sensorValueLft > 90) && (sensorValueRgt >90)){
-    Forward(Left);
-    Forward(Right);
+  else if ((sensorValueLft < 50) && (sensorValueMid > 90) && (sensorValueRgt < 50)){  //010 --> Fast Forward
+    if(sensorValueMid > 180){
+      Forward(Left, 255);
+      Forward(Right, 255);
+      }
+    else{
+      Forward(Left, 190);
+      Forward(Right, 190);
+      }
     }
-  else{
-    Forward(Right);
-    Backward(Left);
+  else if ((sensorValueLft < 50) && (sensorValueMid > 90) && (sensorValueRgt > 90)){  //011 --> Turn Right
+    Turn(Right);
+    Flag = "Right";
     }
-  }
-else if ((sensorValueLft > 90)&& (sensorValueRgt < 50) && distance > 5){
+  else if ((sensorValueLft > 90) && (sensorValueMid < 50) && (sensorValueRgt < 50)){  //100 --> Fast turn Left
+//    Stop();
+//    Forward(Right, 255);
     Turn(Left);
     Flag = "Left";
     }
-else if ((sensorValueLft <50)&& (sensorValueRgt > 90) && distance > 5){
-    Turn(Right);
-    Flag = "Right";
+  else if ((sensorValueLft > 90) && (sensorValueMid > 90) && (sensorValueRgt < 50)){  //110 --> Turn Left
+    Turn(Left);
+    Flag = "Left";
     }
-else{
-  if (Flag == "Left"){
-    Stop();
-    delay(200);
-    Forward(Right);
-    Backward(Left);
-    delay(10);
+  else if ((sensorValueLft > 90) && (sensorValueMid > 90) && (sensorValueRgt > 90)){  //111 --> Forward
+    Forward(Left, 255);
+    Forward(Right, 255);
+    }
+  else{  //101 --> Not defined
+    }
   }
-  else if (Flag == "Right"){
-    Stop();
-    delay(200);
-    Forward(Left);
-    Backward(Right);
-    delay(10);
-    
-    }
+//else if (distance > 5){ //object between 9 and 5cm
+//    if ((sensorValueLft < 50) && (sensorValueMid < 50) && (sensorValueRgt < 50)){  //000  --> Search for black
+//    if (Flag == "Left"){
+//      Stop();
+//      delay(200);
+//      Forward(Right, 200);
+//      Backward(Left, 200);
+//      delay(10);
+//      }
+//    else if (Flag == "Right"){
+//      Stop();
+//      delay(200);
+//      Forward(Left, 200);
+//      Backward(Right, 200);
+//      delay(10);
+//      }
+//    }
+//  else if ((sensorValueLft < 50) && (sensorValueMid < 50) && (sensorValueRgt > 90)){  //001 --> Fast turn Right
+//    Stop();
+//    Forward(Left, 255/2);
+//    Flag = "Right";
+//    }
+//  else if ((sensorValueLft < 50) && (sensorValueMid > 90) && (sensorValueRgt < 50)){  //010 --> Fast Forward
+//    if(sensorValueMid > 180){
+//      Forward(Left, 255/2);
+//      Forward(Right, 255/2);
+//      }
+//    else{
+//      Forward(Left, 190/2);
+//      Forward(Right, 190/2);
+//      }
+//    }
+//  else if ((sensorValueLft < 50) && (sensorValueMid > 90) && (sensorValueRgt > 90)){  //011 --> Turn Right
+//    Turn(Right);
+//    Flag = "Right";
+//    }
+//  else if ((sensorValueLft > 90) && (sensorValueMid < 50) && (sensorValueRgt < 50)){  //100 --> Fast turn Left
+//    Stop();
+//    Forward(Right, 255/2);
+//    Flag = "Left";
+//    }
+//  else if ((sensorValueLft > 90) && (sensorValueMid > 90) && (sensorValueRgt < 50)){  //110 --> Turn Left
+//    Turn(Left);
+//    Flag = "Left";
+//    }
+//  else if ((sensorValueLft > 90) && (sensorValueMid > 90) && (sensorValueRgt > 90)){  //111 --> Forward
+//    Forward(Left, 255/2);
+//    Forward(Right, 255/2);
+//    }
+//  else{  //101 --> Not defined
+//    }
+//  }
+else{ // detected object at less than 5cm
+  Stop();
+  delay(50);
+  Forward(Right, 200);
+  Backward(Left, 200);
+  delay(10);
+  }
 }
-/*Forward(Left);
-Forward(Right);
-delay(500);
-Backward(Left);
-Backward(Right);
-delay(500);
-Turn(Left);
-delay(800);
-Turn(Right);
-delay(800);
-Stop();
-delay(500);*/
-}
-void Forward(String side){ 
+void Forward(String side, int spd){ 
 if (side == "Left"){
   digitalWrite(powerLeft, HIGH);
   digitalWrite(brgLeft, LOW);
-  digitalWrite(pwmLeft, HIGH);  
+  analogWrite(pwmLeft, spd);  
   }  
 else if (side == "Right"){
   digitalWrite(powerRight, HIGH);
   digitalWrite(brgRight, HIGH);
-  digitalWrite(pwmRight, LOW);
+  analogWrite(pwmRight, 255-spd);
   }
 }
-void Backward(String side){ 
+void Backward(String side, int spd){ 
 if (side == "Left"){
   digitalWrite(powerLeft, HIGH);
   digitalWrite(brgLeft, HIGH);
-  digitalWrite(pwmLeft, LOW);
+  analogWrite(pwmLeft, 255-spd);
   }  
 else if (side == "Right"){
   digitalWrite(powerRight, HIGH);
   digitalWrite(brgRight, LOW);
-  digitalWrite(pwmRight, HIGH);
+  analogWrite(pwmRight, spd);
   }
 }
 void Turn(String side){
@@ -176,16 +230,16 @@ if (side == "Left"){
   digitalWrite(powerLeft, HIGH);
   digitalWrite(brgRight, HIGH);
   digitalWrite(brgLeft, LOW);
-  analogWrite(pwmRight,0);
-  analogWrite(pwmLeft,127);
+  analogWrite(pwmRight,127);
+  analogWrite(pwmLeft,127/2);
   }
 else if (side == "Right"){
   digitalWrite(powerRight, HIGH);
   digitalWrite(powerLeft, HIGH);
   digitalWrite(brgRight, HIGH);
   digitalWrite(brgLeft, LOW);
-  analogWrite(pwmLeft,255);
-  analogWrite(pwmRight,127);
+  analogWrite(pwmLeft,255/2);
+  analogWrite(pwmRight,191.25);
   }
 }
 void Stop(){
