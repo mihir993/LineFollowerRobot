@@ -23,6 +23,7 @@ String Right = "Right";
 String Flag = "Left";
 float coeff = 1.0;
 float turncoeff = 1.0;
+int dlay = 5;
 //Declairatios for LCD
 #include<Wire.h>                                                          
 #include <LiquidCrystal_I2C.h>
@@ -106,94 +107,59 @@ if (distance > 10){ // No objects till 9cm
       }
     }
   else if ((sensorValueLft < 50) && (sensorValueMid < 50) && (sensorValueRgt > 90)){  //001 --> Fast turn Right
-    //Stop();
-    //Forward(Left, 255);
+//    Stop();
+//    Forward(Left, 255*0.85);
+    Stop();
     Turn(Right);
     Flag = "Right";
+    delayMicroseconds(dlay);
     }
   else if ((sensorValueLft < 50) && (sensorValueMid > 90) && (sensorValueRgt < 50)){  //010 --> Fast Forward
     if(sensorValueMid > 180){
+      Stop();
       Forward(Left, 255*coeff);
       Forward(Right, 255*coeff);
+      delayMicroseconds(dlay);
       }
     else{
+      Stop();
       Forward(Left, 255*coeff);
       Forward(Right, 255*coeff);
+      delayMicroseconds(dlay);
       }
     }
   else if ((sensorValueLft < 50) && (sensorValueMid > 90) && (sensorValueRgt > 90)){  //011 --> Turn Right
+    Stop();
+    //Forward(Left, 255*0.75);
     Turn(Right);
     Flag = "Right";
+    delayMicroseconds(dlay);
     }
   else if ((sensorValueLft > 90) && (sensorValueMid < 50) && (sensorValueRgt < 50)){  //100 --> Fast turn Left
 //    Stop();
-//    Forward(Right, 255);
+//    Forward(Right, 255*0.85);
+    Stop();
     Turn(Left);
     Flag = "Left";
+    delayMicroseconds(dlay);
     }
   else if ((sensorValueLft > 90) && (sensorValueMid > 90) && (sensorValueRgt < 50)){  //110 --> Turn Left
+    Stop();
+    //Forward(Right, 255*0.75);
     Turn(Left);
     Flag = "Left";
+    delayMicroseconds(dlay);
     }
   else if ((sensorValueLft > 90) && (sensorValueMid > 90) && (sensorValueRgt > 90)){  //111 --> Forward
+    Stop();
     Forward(Left, 255*coeff);
     Forward(Right, 255*coeff);
+    delayMicroseconds(dlay);
     }
   else{  //101 --> Not defined
     }
   }
-//else if (distance > 5){ //object between 9 and 5cm
-//    if ((sensorValueLft < 50) && (sensorValueMid < 50) && (sensorValueRgt < 50)){  //000  --> Search for black
-//    if (Flag == "Left"){
-//      Stop();
-//      delay(200);
-//      Forward(Right, 200);
-//      Backward(Left, 200);
-//      delay(10);
-//      }
-//    else if (Flag == "Right"){
-//      Stop();
-//      delay(200);
-//      Forward(Left, 200);
-//      Backward(Right, 200);
-//      delay(10);
-//      }
-//    }
-//  else if ((sensorValueLft < 50) && (sensorValueMid < 50) && (sensorValueRgt > 90)){  //001 --> Fast turn Right
-//    Stop();
-//    Forward(Left, 255/2);
-//    Flag = "Right";
-//    }
-//  else if ((sensorValueLft < 50) && (sensorValueMid > 90) && (sensorValueRgt < 50)){  //010 --> Fast Forward
-//    if(sensorValueMid > 180){
-//      Forward(Left, 255/2);
-//      Forward(Right, 255/2);
-//      }
-//    else{
-//      Forward(Left, 190/2);
-//      Forward(Right, 190/2);
-//      }
-//    }
-//  else if ((sensorValueLft < 50) && (sensorValueMid > 90) && (sensorValueRgt > 90)){  //011 --> Turn Right
-//    Turn(Right);
-//    Flag = "Right";
-//    }
-//  else if ((sensorValueLft > 90) && (sensorValueMid < 50) && (sensorValueRgt < 50)){  //100 --> Fast turn Left
-//    Stop();
-//    Forward(Right, 255/2);
-//    Flag = "Left";
-//    }
-//  else if ((sensorValueLft > 90) && (sensorValueMid > 90) && (sensorValueRgt < 50)){  //110 --> Turn Left
-//    Turn(Left);
-//    Flag = "Left";
-//    }
-//  else if ((sensorValueLft > 90) && (sensorValueMid > 90) && (sensorValueRgt > 90)){  //111 --> Forward
-//    Forward(Left, 255/2);
-//    Forward(Right, 255/2);
-//    }
-//  else{  //101 --> Not defined
-//    }
-//  }
+
 else{ // detected object at less than 5cm
   Stop();
   delay(50);
