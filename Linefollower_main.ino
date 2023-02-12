@@ -23,7 +23,7 @@ String Right = "Right";
 String Flag = "Left";
 float coeff = 1.0;
 float turncoeff = 1.0;
-int dlay = 5;
+int dlay = 0;
 //Declairatios for LCD
 #include<Wire.h>                                                          
 #include <LiquidCrystal_I2C.h>
@@ -44,6 +44,7 @@ void setup() {
   digitalWrite(brgLeft, LOW);
   digitalWrite(pwmRight, LOW);
   digitalWrite(pwmLeft, LOW);
+  setPwmFrequency(3, 32);
   // Setups for Octocouplers
   pinMode(sensorRgt, INPUT_PULLUP);
   pinMode(sensorMid, INPUT_PULLUP);
@@ -107,10 +108,12 @@ if (distance > 10){ // No objects till 9cm
       }
     }
   else if ((sensorValueLft < 50) && (sensorValueMid < 50) && (sensorValueRgt > 90)){  //001 --> Fast turn Right
-//    Stop();
-//    Forward(Left, 255*0.85);
+    //Stop();
+    //Forward(Left, 255);
     Stop();
-    Turn(Right);
+//    Turn(Right);
+    Forward(Left, 255*coeff);
+    Forward(Right, 255*coeff*0.25);
     Flag = "Right";
     delayMicroseconds(dlay);
     }
@@ -130,22 +133,23 @@ if (distance > 10){ // No objects till 9cm
     }
   else if ((sensorValueLft < 50) && (sensorValueMid > 90) && (sensorValueRgt > 90)){  //011 --> Turn Right
     Stop();
-    //Forward(Left, 255*0.75);
     Turn(Right);
     Flag = "Right";
     delayMicroseconds(dlay);
+    
     }
   else if ((sensorValueLft > 90) && (sensorValueMid < 50) && (sensorValueRgt < 50)){  //100 --> Fast turn Left
 //    Stop();
-//    Forward(Right, 255*0.85);
+//    Forward(Right, 255);
     Stop();
-    Turn(Left);
+    //Turn(Left);
+    Forward(Left, 255*coeff*0.25);
+    Forward(Right, 255*coeff);
     Flag = "Left";
     delayMicroseconds(dlay);
     }
   else if ((sensorValueLft > 90) && (sensorValueMid > 90) && (sensorValueRgt < 50)){  //110 --> Turn Left
     Stop();
-    //Forward(Right, 255*0.75);
     Turn(Left);
     Flag = "Left";
     delayMicroseconds(dlay);
@@ -159,12 +163,64 @@ if (distance > 10){ // No objects till 9cm
   else{  //101 --> Not defined
     }
   }
-
+//else if (distance > 5){ //object between 9 and 5cm
+//    if ((sensorValueLft < 50) && (sensorValueMid < 50) && (sensorValueRgt < 50)){  //000  --> Search for black
+//    if (Flag == "Left"){
+//      Stop();
+//      delay(200);
+//      Forward(Right, 200);
+//      Backward(Left, 200);
+//      delay(10);
+//      }
+//    else if (Flag == "Right"){
+//      Stop();
+//      delay(200);
+//      Forward(Left, 200);
+//      Backward(Right, 200);
+//      delay(10);
+//      }
+//    }
+//  else if ((sensorValueLft < 50) && (sensorValueMid < 50) && (sensorValueRgt > 90)){  //001 --> Fast turn Right
+//    Stop();
+//    Forward(Left, 255/2);
+//    Flag = "Right";
+//    }
+//  else if ((sensorValueLft < 50) && (sensorValueMid > 90) && (sensorValueRgt < 50)){  //010 --> Fast Forward
+//    if(sensorValueMid > 180){
+//      Forward(Left, 255/2);
+//      Forward(Right, 255/2);
+//      }
+//    else{
+//      Forward(Left, 190/2);
+//      Forward(Right, 190/2);
+//      }
+//    }
+//  else if ((sensorValueLft < 50) && (sensorValueMid > 90) && (sensorValueRgt > 90)){  //011 --> Turn Right
+//    Turn(Right);
+//    Flag = "Right";
+//    }
+//  else if ((sensorValueLft > 90) && (sensorValueMid < 50) && (sensorValueRgt < 50)){  //100 --> Fast turn Left
+//    Stop();
+//    Forward(Right, 255/2);
+//    Flag = "Left";
+//    }
+//  else if ((sensorValueLft > 90) && (sensorValueMid > 90) && (sensorValueRgt < 50)){  //110 --> Turn Left
+//    Turn(Left);
+//    Flag = "Left";
+//    }
+//  else if ((sensorValueLft > 90) && (sensorValueMid > 90) && (sensorValueRgt > 90)){  //111 --> Forward
+//    Forward(Left, 255/2);
+//    Forward(Right, 255/2);
+//    }
+//  else{  //101 --> Not defined
+//    }
+//  }
 else{ // detected object at less than 5cm
   Stop();
   delay(50);
   Forward(Right, 200);
   Backward(Left, 200);
+  Flag = "Left";
   delay(10);
   }
 }
@@ -213,4 +269,35 @@ else if (side == "Right"){
 void Stop(){
 digitalWrite(powerRight, LOW);
 digitalWrite(powerLeft, LOW);
+}
+
+void setPwmFrequency(int pin, int divisor) {
+  byte mode;
+  if(pin == 5 || pin == 6 || pin == 9 || pin == 10) {
+    switch(divisor) {
+      case 1: mode = 0x01; break;
+      case 8: mode = 0x02; break;
+      case 64: mode = 0x03; break;
+      case 256: mode = 0x04; break;
+      case 1024: mode = 0x05; break;
+      default: return;
+    }
+    if(pin == 5 || pin == 6) {
+      TCCR0B = TCCR0B & 0b11111000 | mode;
+    } else {
+      TCCR1B = TCCR1B & 0b11111000 | mode;
+    }
+  } else if(pin == 3 || pin == 11) {
+    switch(divisor) {
+      case 1: mode = 0x01; break;
+      case 8: mode = 0x02; break;
+      case 32: mode = 0x03; break;
+      case 64: mode = 0x04; break;
+      case 128: mode = 0x05; break;
+      case 256: mode = 0x06; break;
+      case 1024: mode = 0x07; break;
+      default: return;
+    }
+    TCCR2B = TCCR2B & 0b11111000 | mode;
+  }
 }
